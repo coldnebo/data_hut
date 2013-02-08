@@ -9,7 +9,9 @@ This hasn't been optimized yet, but has the basic features for small one-off ana
 
 Add this line to your application's Gemfile:
 
-    gem 'data_hut'
+*NOTE* I haven't released this gem yet, so you'll need to ref git:
+
+    gem 'data_hut', :git => "git://github.com/coldnebo/data_hut.git"
 
 And then execute:
 
