@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["larry.kyrala@gmail.com"]
   gem.description   = %q{A small, portable data warehouse for Ruby for analytics on anything!}
   gem.summary       = %q{Like a data warehouse, but smaller.}
-  gem.homepage      = ""
+  gem.homepage      = "https://github.com/coldnebo/data_hut"
 
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
