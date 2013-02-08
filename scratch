@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+# allows this script to behave as if the gem were installed.
+lp = File.expand_path(File.join(*%w[lib]), File.dirname(__FILE__))
+unless $LOAD_PATH.include?(lp)
+  $LOAD_PATH.unshift(lp)
+end
+
+# ------------------ manual example of client usage for docs, etc. -----------
+
+    require 'data_hut'
+    require 'pry'
+
+    dh = DataHut.connect("scratch")
+
+    data = [{name: "barney", age: 27, login: DateTime.parse('2008-05-03') },
+            {name: "phil", age: 31},
+            {name: "fred", age: 44, login: DateTime.parse('2013-02-07')}]
+
+    # extract your data by iterating over your data format (from whatever source) and map it to a record model...
+    dh.extract(data) do |r, d|
+      r.name = d[:name]
+      r.age = d[:age]
+      # data quality step:
+      d[:login] = DateTime.new unless d.has_key?(:login)
+      r.last_active = d[:login]
+    end
+
+    # transform your data by adding fields to it
+    dh.transform do |r|
+      r.eligible = r.age < 30
+    end
+
+    # operate on your dataset by using chained queries
+    ds = dh.dataset
+
+    binding.pry
+
+
+    # clean up scratch demo
+    FileUtils.rm("scratch.db")
+    puts "done."
