@@ -11,9 +11,7 @@ DataHut has basic features for small one-off analytics like parsing error logs a
 
 Add this line to your application's Gemfile:
 
-*NOTE* I haven't released this gem yet, so you'll need to ref git:
-
-    gem 'data_hut', :git => "git://github.com/coldnebo/data_hut.git"
+    gem 'data_hut'
 
 And then execute:
 
