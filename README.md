@@ -146,30 +146,30 @@ Now that we have some data, lets play...
 
 * who has the most base damage?
 
-    [14] pry(main)> ds.order(Sequel.desc(:damage)).limit(5).collect{|c| {c.name => c.damage}}
-    => [{"Taric"=>58.0},
-     {"Maokai"=>58.0},
-     {"Warwick"=>56.76},
-     {"Singed"=>56.65},
-     {"Poppy"=>56.3}]
+        [14] pry(main)> ds.order(Sequel.desc(:damage)).limit(5).collect{|c| {c.name => c.damage}}
+        => [{"Taric"=>58.0},
+         {"Maokai"=>58.0},
+         {"Warwick"=>56.76},
+         {"Singed"=>56.65},
+         {"Poppy"=>56.3}]
 
 * but wait a minute... what about at level 18?  Fortunately, we've transformed our data to add some extra fields for this...
 
-    [3] pry(main)> ds.order(Sequel.desc(:total_damage)).limit(5).collect{|c| {c.name => c.total_damage}}
-    => [{"Skarner"=>129.70000000000002},
-     {"Cho'Gath"=>129.70000000000002},
-     {"Kassadin"=>122.5},
-     {"Taric"=>121.0},
-     {"Alistar"=>120.19}]
+        [3] pry(main)> ds.order(Sequel.desc(:total_damage)).limit(5).collect{|c| {c.name => c.total_damage}}
+        => [{"Skarner"=>129.70000000000002},
+         {"Cho'Gath"=>129.70000000000002},
+         {"Kassadin"=>122.5},
+         {"Taric"=>121.0},
+         {"Alistar"=>120.19}]
 
 * Ahh, a different ranking... that's interesting.  Ok, what if we use a metric to combine common tanking characteristics?
 
-    [4] pry(main)> ds.order(Sequel.desc(:tank_index)).limit(5).collect{|c| {c.name => [c.total_damage, c.total_health, c.total_armor]}}
-    => [{"Skarner"=>[129.70000000000002, 515.6, 87.39999999999999]},
-     {"Cho'Gath"=>[129.70000000000002, 515.6, 82.0]},
-     {"Poppy"=>[117.05, 483.75, 90.0]},
-     {"Maokai"=>[117.4, 480.4, 90.0]},
-     {"Sejuani"=>[117.0, 513.0, 83.5]}]
+        [4] pry(main)> ds.order(Sequel.desc(:tank_index)).limit(5).collect{|c| {c.name => [c.total_damage, c.total_health, c.total_armor]}}
+        => [{"Skarner"=>[129.70000000000002, 515.6, 87.39999999999999]},
+         {"Cho'Gath"=>[129.70000000000002, 515.6, 82.0]},
+         {"Poppy"=>[117.05, 483.75, 90.0]},
+         {"Maokai"=>[117.4, 480.4, 90.0]},
+         {"Sejuani"=>[117.0, 513.0, 83.5]}]
 
 Again, slightly different, but very interesting!
 
