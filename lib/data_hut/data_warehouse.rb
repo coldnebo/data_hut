@@ -11,7 +11,8 @@ module DataHut
     end
 
     def initialize(name)
-      @db = Sequel.sqlite("#{name}.db")
+      @db_file = "#{name}.db"
+      @db = Sequel.sqlite(@db_file)
       #@db.logger = ::Logger.new(STDOUT)
       unless @db.table_exists?(:data_warehouse)
         @db.create_table(:data_warehouse) do
@@ -39,9 +40,7 @@ module DataHut
       raise(ArgumentError, "a block is required for transform.", caller) unless block_given?
 
       # now process all the records with the updated schema...
-      dataset.each do |d|
-        # first, convert the Sequel::Model to a hash
-        h = d.to_hash
+      @db[:data_warehouse].each do |h|
         # then get rid of the internal id part
         dw_id = h.delete(:dw_id)
         # copy record fields to an openstruct
@@ -56,7 +55,6 @@ module DataHut
         @db[:data_warehouse].where(dw_id: dw_id).update(h)
       end
     end
-
 
     private 
 

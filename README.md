@@ -145,10 +145,8 @@ Taking a popular game like League of Legends and hand-rolling some simple analys
       puts "done."
     end
 
-
     dh = DataHut.connect("lolstats")
 
-    if false
     dh.transform do |r|
       r.total_damage = r.damage + (r.damage_per_level * 18.0)
       r.total_health = r.health + (r.health_per_level * 18.0)
@@ -160,17 +158,17 @@ Taking a popular game like League of Legends and hand-rolling some simple analys
       r.total_mana_regen = r.mana_regen + (r.mana_regen_per_level * 18.0)
     end
 
+    # there's no need to do transforms all in one batch either... you can layer them...
     dh.transform do |r|
       # this index combines the tank dimensions above for best combination (simple Euclidean metric)
-      # note: L-values can be new, but R-values must exist.
       r.nuke_index = r.total_damage * r.total_move_speed * r.total_mana * r.ability_power
       r.tenacious_index = r.total_armor * r.total_health * r.total_spell_block * r.total_health_regen * r.defense_power 
-    end
     end
 
     ds = dh.dataset
 
     binding.pry
+
 
 Now that we have some data, lets play...
 
@@ -204,23 +202,9 @@ nuke are subjective, but that's the fun of it; we can model our assumptions and 
 
 I must have hit close to the mark, because personally I hate each of these champions when I go up against them!  ;)
 
-
-Again, slightly different, but very interesting!
-
 Ok, you get the idea now!  
 
 Have fun!
-
-
-## Known Bugs
-
-* the current example transforms fail on a clean db, but work after running a second time.  This makes me think there is a lock condition somewhere in the update that is leading to inconsistent state, but it's not easy to find.  Possibly I might have to separate the alter schema -- perhaps each is keeping the query open and preventing the update from completely succeeding, but it's subtle.
-
-* so, tried two things:
-1. alter schema on first record and then iterate without it.
-2. leave it as is.
-
-Either way resulted in the same behavior on the first run... so apparently the dataset needs to be closed and reopened to restore consistency.
 
 
 ## TODOS

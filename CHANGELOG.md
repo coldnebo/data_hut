@@ -1,5 +1,11 @@
 
 
+0.0.3
+-----
+
+* fixed an update issue found in transforms where data was written successfully, but Sequel::Model couldn't read it immediately after.
+
+
 0.0.2
 -----
 
