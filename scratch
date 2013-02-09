@@ -23,12 +23,40 @@ end
       # data quality step:
       d[:login] = DateTime.new unless d.has_key?(:login)
       r.last_active = d[:login]
+      print 'v'
     end
 
     # transform your data by adding fields to it
     dh.transform do |r|
       r.eligible = r.age < 30
+      print '*'
     end
+
+    dh.transform_complete
+
+    # later... you have more data...
+    data = [{name: "sarah", age: 24, login: DateTime.parse('2011-04-01') },
+            {name: "robin", age: 45},
+            {name: "jane", age: 19, login: DateTime.parse('2012-10-14')}]
+
+    # add it too...
+    dh.extract(data) do |r, d|
+      r.name = d[:name]
+      r.age = d[:age]
+      # data quality step:
+      d[:login] = DateTime.new unless d.has_key?(:login)
+      r.last_active = d[:login]
+      print 'v'
+    end
+
+    # and only transform the new records automatically
+    dh.transform do |r|
+      r.eligible = r.age < 30
+      print '*'
+    end
+
+    dh.transform_complete
+
 
     # operate on your dataset by using chained queries
     ds = dh.dataset
@@ -40,7 +68,7 @@ end
     FileUtils.rm("scratch.db")
     puts "done."
 
-
+#exit
 
 # ------------------------------ a more ambitious example -------------------------
 
@@ -101,6 +129,7 @@ end
 
     dh = DataHut.connect("lolstats")
 
+    puts "first transform"
     dh.transform do |r|
       r.total_damage = r.damage + (r.damage_per_level * 18.0)
       r.total_health = r.health + (r.health_per_level * 18.0)
@@ -110,14 +139,23 @@ end
       r.total_spell_block = r.spell_block + (r.spell_block_per_level * 18.0)
       r.total_health_regen = r.health_regen + (r.health_regen_per_level * 18.0)
       r.total_mana_regen = r.mana_regen + (r.mana_regen_per_level * 18.0)
+      print '.'
     end
 
+    puts "second transform"
     # there's no need to do transforms all in one batch either... you can layer them...
-    dh.transform do |r|
+    dh.transform(true) do |r|
       # this index combines the tank dimensions above for best combination (simple Euclidean metric)
-      r.nuke_index = r.total_damage * r.total_move_speed * r.total_mana * r.ability_power
-      r.tenacious_index = r.total_armor * r.total_health * r.total_spell_block * r.total_health_regen * r.defense_power 
+      r.nuke_index = r.total_damage * r.total_move_speed * r.total_mana * (r.ability_power)
+      r.easy_nuke_index = r.total_damage * r.total_move_speed * r.total_mana * (r.ability_power) * (1.0/r.difficulty)
+      r.tenacious_index = r.total_armor * r.total_health * r.total_spell_block * r.total_health_regen * (r.defense_power)
+      r.support_index = r.total_mana * r.total_armor * r.total_spell_block * r.total_health * r.total_health_regen * r.total_mana_regen * (r.ability_power * r.defense_power)
+      print '.'
     end
+
+    # use once at the end to mark records processed.
+    dh.transform_complete
+    puts "transforms complete"
 
     ds = dh.dataset
 

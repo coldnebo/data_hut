@@ -17,6 +17,7 @@ module DataHut
       unless @db.table_exists?(:data_warehouse)
         @db.create_table(:data_warehouse) do
           primary_key :dw_id
+          column :dw_processed, TrueClass, :null => false, :default => false
         end
       end
     end
@@ -36,13 +37,18 @@ module DataHut
     end
 
     # transform all (could also be limited to not processed)
-    def transform
+    def transform(forced=false)
       raise(ArgumentError, "a block is required for transform.", caller) unless block_given?
 
       # now process all the records with the updated schema...
       @db[:data_warehouse].each do |h|
-        # then get rid of the internal id part
+        # check for processed if not forced
+        unless forced
+          next if h[:dw_processed] == true
+        end
+        # then get rid of the internal id and processed flags
         dw_id = h.delete(:dw_id)
+        h.delete(:dw_processed)
         # copy record fields to an openstruct
         r = OpenStruct.new(h)
         # and let the transformer modify it...
@@ -54,6 +60,10 @@ module DataHut
         # and use it to update the record
         @db[:data_warehouse].where(dw_id: dw_id).update(h)
       end
+    end
+
+    def transform_complete
+      @db[:data_warehouse].update(:dw_processed => true)
     end
 
     private 

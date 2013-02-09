@@ -2,7 +2,9 @@
 
 A small, portable data warehouse for Ruby for analytics on anything!
 
-This hasn't been optimized yet, but has the basic features for small one-off analytics like parsing error logs and such.
+DataHut has basic features for small one-off analytics like parsing error logs and such.  Like its bigger cousin (the Data Warehouse) it has support for *extract*, *transform* and *load* processes (ETL).  Unlike its bigger cousin it is simple to setup and use for simple projects.
+
+*Extract* your data from anywhere, *transform* it however you like and *analyze* it for insights!
 
 
 ## Installation
@@ -147,6 +149,7 @@ Taking a popular game like League of Legends and hand-rolling some simple analys
 
     dh = DataHut.connect("lolstats")
 
+    puts "first transform"
     dh.transform do |r|
       r.total_damage = r.damage + (r.damage_per_level * 18.0)
       r.total_health = r.health + (r.health_per_level * 18.0)
@@ -156,14 +159,23 @@ Taking a popular game like League of Legends and hand-rolling some simple analys
       r.total_spell_block = r.spell_block + (r.spell_block_per_level * 18.0)
       r.total_health_regen = r.health_regen + (r.health_regen_per_level * 18.0)
       r.total_mana_regen = r.mana_regen + (r.mana_regen_per_level * 18.0)
+      print '.'
     end
 
+    puts "second transform"
     # there's no need to do transforms all in one batch either... you can layer them...
-    dh.transform do |r|
+    dh.transform(true) do |r|
       # this index combines the tank dimensions above for best combination (simple Euclidean metric)
-      r.nuke_index = r.total_damage * r.total_move_speed * r.total_mana * r.ability_power
-      r.tenacious_index = r.total_armor * r.total_health * r.total_spell_block * r.total_health_regen * r.defense_power 
+      r.nuke_index = r.total_damage * r.total_move_speed * r.total_mana * (r.ability_power)
+      r.easy_nuke_index = r.total_damage * r.total_move_speed * r.total_mana * (r.ability_power) * (1.0/r.difficulty)
+      r.tenacious_index = r.total_armor * r.total_health * r.total_spell_block * r.total_health_regen * (r.defense_power)
+      r.support_index = r.total_mana * r.total_armor * r.total_spell_block * r.total_health * r.total_health_regen * r.total_mana_regen * (r.ability_power * r.defense_power)
+      print '.'
     end
+
+    # use once at the end to mark records processed.
+    dh.transform_complete
+    puts "transforms complete"
 
     ds = dh.dataset
 
@@ -202,7 +214,17 @@ nuke are subjective, but that's the fun of it; we can model our assumptions and 
 
 I must have hit close to the mark, because personally I hate each of these champions when I go up against them!  ;)
 
-Ok, you get the idea now!  
+* and (now I risk becoming addicted to datahut myself), here's some further guesses with an easy_nuke index:
+
+        [2] pry(main)> ds.order(Sequel.desc(:easy_nuke_index)).limit(5).collect{|c| c.name}
+        => ["Sona", "Ryze", "Nasus", "Soraka", "Heimerdinger"]
+
+* makes sense, but is still fascinating... what about my crack at a support_index?
+
+        [3] pry(main)> ds.order(Sequel.desc(:support_index)).limit(5).collect{|c| c.name}
+        => ["Sion", "Diana", "Nunu", "Nautilus", "Amumu"]
+
+You get the idea now!  *Extract* your data from anywhere, *transform* it however you like and *analyze* it for insights!
 
 Have fun!
 
@@ -210,9 +232,8 @@ Have fun!
 ## TODOS
 
 * fill out tests
-* add optimizations for skipping processed records on transform (i.e. transform only unprocessed records)
 * further optimizations
-* time-based series and binning.
+* time-based series and binning helpers (by week/day/hour/5-min/etc).
 
 ## Contributing
 

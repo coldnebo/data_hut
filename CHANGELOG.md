@@ -1,4 +1,11 @@
 
+0.0.4
+-----
+
+* added the capability to mark records in the datahut as processed so that transform passes can ignore previously processed data and only process new data... good for cycles where you pull regular updates and then process them.
+
+* added capability to force the transform to write in spite of processed; good for situations where you are playing with the structure of the transform and want to regenerate the data.
+
 
 0.0.3
 -----
