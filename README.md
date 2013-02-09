@@ -162,14 +162,18 @@ Now that we have some data, lets play...
          {"Taric"=>121.0},
          {"Alistar"=>120.19}]
 
-* Ahh, a different ranking... that's interesting.  Ok, what if we use a metric to combine common tanking characteristics?
+* how about using some of the indexes we defined above... like the 'nuke_index' (notice that the assumptions on what make a good
+nuke are subjective, but that's the fun of it; we can model our assumptions and see how the data changes in response.)
 
-        [4] pry(main)> ds.order(Sequel.desc(:tank_index)).limit(5).collect{|c| {c.name => [c.total_damage, c.total_health, c.total_armor]}}
-        => [{"Skarner"=>[129.70000000000002, 515.6, 87.39999999999999]},
-         {"Cho'Gath"=>[129.70000000000002, 515.6, 82.0]},
-         {"Poppy"=>[117.05, 483.75, 90.0]},
-         {"Maokai"=>[117.4, 480.4, 90.0]},
-         {"Sejuani"=>[117.0, 513.0, 83.5]}]
+        [5] pry(main)> ds.order(Sequel.desc(:nuke_index)).limit(5).collect{|c| {c.name => [c.total_damage, c.total_move_speed, c.total_mana, c.ability_power]}}
+        => [{"Karthus"=>[100.7, 335.0, 1368.0, 10]},
+         {"Morgana"=>[114.58, 335.0, 1320.0, 9]},
+         {"Ryze"=>[106.0, 335.0, 1240.0, 10]},
+         {"Karma"=>[109.4, 335.0, 1320.0, 9]},
+         {"Lux"=>[109.4, 340.0, 1150.0, 10]}]
+
+I must have hit close to the mark, because personally I hate each of these champions when I go up against them!  ;)
+
 
 Again, slightly different, but very interesting!
 
@@ -177,6 +181,16 @@ Ok, you get the idea now!
 
 Have fun!
 
+
+## Known Bugs
+
+* the current example transforms fail on a clean db, but work after running a second time.  This makes me think there is a lock condition somewhere in the update that is leading to inconsistent state, but it's not easy to find.  Possibly I might have to separate the alter schema -- perhaps each is keeping the query open and preventing the update from completely succeeding, but it's subtle.
+
+* so, tried two things:
+1. alter schema on first record and then iterate without it.
+2. leave it as is.
+
+Either way resulted in the same behavior on the first run... so apparently the dataset needs to be closed and reopened to restore consistency.
 
 
 ## TODOS

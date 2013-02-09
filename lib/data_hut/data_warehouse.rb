@@ -1,5 +1,6 @@
 require 'sequel'
 require 'ostruct'
+require 'logger'
 
 module DataHut
   class DataWarehouse
@@ -11,6 +12,7 @@ module DataHut
 
     def initialize(name)
       @db = Sequel.sqlite("#{name}.db")
+      #@db.logger = ::Logger.new(STDOUT)
       unless @db.table_exists?(:data_warehouse)
         @db.create_table(:data_warehouse) do
           primary_key :dw_id
@@ -36,24 +38,21 @@ module DataHut
     def transform
       raise(ArgumentError, "a block is required for transform.", caller) unless block_given?
 
+      # now process all the records with the updated schema...
       dataset.each do |d|
+        # first, convert the Sequel::Model to a hash
         h = d.to_hash
+        # then get rid of the internal id part
         dw_id = h.delete(:dw_id)
-
-        src_fields = h.keys
-        # copy src fields to an openstruct
+        # copy record fields to an openstruct
         r = OpenStruct.new(h)
-        # let the transformer modify it...
+        # and let the transformer modify it...
         yield r
-        #dst_fields = r.marshal_dump.keys
-        #diff_fields = dst_fields - src_fields
-        # add any new transformation fields to the schema...
+        # now add any new transformation fields to the schema...
         adapt_schema(r)
-        # dump as hash
+        # get the update hash from the openstruct
         h = r.marshal_dump
-        # remove the source fields
-        h.delete(src_fields)
-        # update only the destination fields
+        # and use it to update the record
         @db[:data_warehouse].where(dw_id: dw_id).update(h)
       end
     end
