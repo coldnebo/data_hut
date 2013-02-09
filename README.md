@@ -230,6 +230,7 @@ Have fun!
 ## TODOS
 
 * fill out tests
+* fill out rdoc
 * further optimizations
 * time-based series and binning helpers (by week/day/hour/5-min/etc).
 
