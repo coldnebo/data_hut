@@ -229,7 +229,6 @@ Have fun!
 
 ## TODOS
 
-* fill out tests
 * further optimizations
 * time-based series and binning helpers (by week/day/hour/5-min/etc).
 
