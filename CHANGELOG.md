@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.5
+
+* added rdoc
+
+* added tests; 100% code coverage.
+
 ## 0.0.4
 
 * added the capability to mark records in the datahut as processed so that transform passes can ignore previously processed data and only process new data... good for cycles where you pull regular updates and then process them.

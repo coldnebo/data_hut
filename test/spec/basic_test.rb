@@ -3,7 +3,7 @@ require_relative File.join(*%w[.. test_helper])
 
 describe DataHut do
   def teardown
-    FileUtils.rm("foo.db", force: true, verbose: true)
+    FileUtils.rm("foo.db", force: true)
   end
 
   describe "gem loading" do
@@ -14,7 +14,7 @@ describe DataHut do
 
   describe "connect" do 
     it "should create a database if none exists" do
-      FileUtils.rm("foo.db", force: true, verbose: true)
+      FileUtils.rm("foo.db", force: true)
       dh = DataHut.connect("foo")
       assert File.exists?("foo.db")
     end
@@ -27,26 +27,113 @@ describe DataHut do
       data = [{name: "barney", age: 27},
               {name: "phil", age: 31},
               {name: "fred", age: 44}]
-
-      # ignore dups!!
-      data2 = [{name: "barney", age: 27},
-              {name: "phil", age: 31},{name: "phil", age: 31},
-              {name: "fred", age: 44}]
               
-      # the idea of the extract phase is that you control exactly how an element of your data 'd' is 
-      # extracted into a transactional record 'r' in the data warehouse.
-      dh.extract(data2) do |r, d|
+      dh.extract(data) do |r, d|
         r.name = d[:name]
         r.age = d[:age]
       end
 
+      assert_equal 3, dh.dataset.count
+
       dh.dataset.each_with_index do |r,i|
-        assert r.name == data[i][:name]
+        assert_equal data[i][:name], r.name
         assert_kind_of(data[i][:name].class, r.name)
-        assert r.age == data[i][:age]
+        assert_equal data[i][:age], r.age 
         assert_kind_of(data[i][:age].class, r.age)
       end
     end
+
+    it "should prevent duplicates from being extracted" do
+      dh = DataHut.connect("foo")
+
+      data = [{name: "barney", age: 27},
+              {name: "barney", age: 27},
+              {name: "phil", age: 31},
+              {name: "phil", age: 31},
+              {name: "fred", age: 44}]
+ 
+      dh.extract(data) do |r, d|
+        r.name = d[:name]
+        r.age = d[:age]
+      end
+
+      assert_equal 3, dh.dataset.count
+    end
+
+    it "should add new records on subsequent extracts" do
+      dh = DataHut.connect("foo")
+
+      # first data pull 
+      data = [{name: "barney", age: 27},
+              {name: "phil", age: 31},
+              {name: "fred", age: 44}]
+ 
+      dh.extract(data) do |r, d|
+        r.name = d[:name]
+        r.age = d[:age]
+      end
+
+      assert_equal 3, dh.dataset.count
+
+      # later on, a second data pull is run with new data...
+      data = [{name: "lisa", age: 27},
+              {name: "mary", age: 19},
+              {name: "jane", age: 33}]
+ 
+      dh.extract(data) do |r, d|
+        r.name = d[:name]
+        r.age = d[:age]
+      end
+
+      assert_equal 6, dh.dataset.count
+    end
+  end
+
+  describe "transform" do 
+    def setup
+      @dh = DataHut.connect("foo")
+
+      data = [{name: "barney", age: 27},
+              {name: "phil",   age: 31},
+              {name: "fred",   age: 44},
+              {name: "lisa",   age: 27},
+              {name: "mary",   age: 19},
+              {name: "jane",   age: 15}]
+      
+      @dh.extract(data) do |r, d|
+        r.name = d[:name]
+        r.age = d[:age]
+      end
+    end
+
+    it "should support transforming existing data" do
+      @dh.transform do |r|
+        r.eligible = r.age > 18 && r.age < 35
+      end
+
+      assert_equal 27.166666666666668, @dh.dataset.avg(:age)
+      sorted_by_name = @dh.dataset.order(:name)
+      eligible = sorted_by_name.where(eligible:true)
+      ineligible = sorted_by_name.where(eligible:false)
+      assert_equal 4, eligible.count
+      assert_equal 2, ineligible.count
+
+      assert_equal ["barney", "lisa", "mary", "phil"], eligible.collect{|d| d.name}
+      assert_equal ["fred", "jane"], ineligible.collect{|d| d.name}
+    end
+
+    it "should support ignoring processed records" do
+      @dh.transform_complete
+
+      called = false
+      @dh.transform do |r|
+        r.eligible = r.age > 18 && r.age < 35
+        called = true
+      end
+
+      refute called
+    end
+
   end
 
 end
