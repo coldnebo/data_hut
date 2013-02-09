@@ -33,9 +33,66 @@ end
     # operate on your dataset by using chained queries
     ds = dh.dataset
 
-    binding.pry
+    #binding.pry
 
 
     # clean up scratch demo
     FileUtils.rm("scratch.db")
     puts "done."
+
+
+
+# ------------------------------ a more ambitious example -------------------------
+
+require 'nokogiri'
+require 'open-uri'
+
+root = 'http://na.leagueoflegends.com'
+
+# load the data once... (manually delete it to refresh)
+unless File.exists?("lolstats.db")
+  dh = DataHut.connect("lolstats")
+
+  champions_page = Nokogiri::HTML(open("#{root}/champions"))
+
+  urls = champions_page.css('table.champion_item td.description span a').collect{|e| e.attribute('href').value}
+
+  puts "loading champion data"
+  dh.extract(urls) do |r, url|
+    champion_page = Nokogiri::HTML(open("#{root}#{url}"))
+    r.name = champion_page.css('div.page_header_text').text
+
+    st = champion_page.css('table.stats_table')
+    names = st.css('td.stats_name').collect{|e| e.text.strip}
+    values = st.css('td.stats_value').collect{|e| e.text.strip}
+    modifiers = st.css('td.stats_modifier').collect{|e| e.text.strip}
+
+    (0..names.count-1).collect do |i| 
+      stat = (names[i].downcase.gsub(/ /,'_') << "=").to_sym
+      r.send(stat, values[i].to_f)
+      stat_per_level = (names[i].downcase.gsub(/ /,'_') << "_per_level=").to_sym
+      per_level_value = modifiers[i].match(/\+([\d\.]+)/)[1].to_f rescue 0
+      r.send(stat_per_level, per_level_value)
+    end
+    print "."
+  end
+  puts "done."
+end
+
+
+dh = DataHut.connect("lolstats")
+
+dh.transform do |r|
+  r.total_damage = r.damage + (r.damage_per_level * 18.0)
+  r.total_health = r.health + (r.damage_per_level * 18.0)
+  r.total_armor = r.armor + (r.armor_per_level * 18.0)
+
+  # this index combines the tank dimensions above for best combination (simple Euclidean metric)
+  r.tank_index = r.total_damage * r.total_health * r.total_armor
+end
+
+ds = dh.dataset
+
+binding.pry
+
+puts "done."

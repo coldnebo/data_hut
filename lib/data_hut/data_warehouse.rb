@@ -19,7 +19,7 @@ module DataHut
     end
 
     def dataset
-      Sequel::Model(:data_warehouse)
+      Class.new(Sequel::Model(@db[:data_warehouse]))
     end
 
     def extract(data)
