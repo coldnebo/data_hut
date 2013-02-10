@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.6 
+
+* externalized the Sequel database logger so that it can be set by DataHut clients.  See DataHut::DataWarehouse#logger=
+
+* added type checking on extract and transform to ensure safe operation with underlying Sequel sqlite3 database.
+
 ## 0.0.5
 
 * added rdoc
