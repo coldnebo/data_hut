@@ -11,5 +11,5 @@ task :default => :test
 
 desc "clean up"
 task :clean do
-  FileUtils.rm(FileList["*.db"], force: true, verbose: true)
+  FileUtils.rm(FileList["samples/**/*.db"], force: true, verbose: true)
 end
