@@ -136,5 +136,43 @@ describe DataHut do
 
   end
 
+
+  describe "nice usage" do  
+
+    class Foo
+    end
+
+    it "should provide logging services to see or debug underlying Sequel" do
+      dh = DataHut.connect("foo")
+
+      dh.logger = ::Logger.new(STDOUT)
+
+      assert_raises(ArgumentError) do
+        dh.logger = Foo.new
+      end
+
+    end
+
+    it "should handle type errors" do
+      dh = DataHut.connect("foo")
+
+      data = [{name: "fred", birthday: '1978-02-11'}]
+
+      # how about dates?
+      dh.extract(data) do |r, d|
+        r.name = d[:name]
+        r.birthday = Date.parse(d[:birthday])
+      end
+
+      # ok, but what about a custom type... that's guaranteed to fail!
+      assert_raises(ArgumentError) do
+        dh.transform do |r|
+          r.my_foo = Foo.new
+        end
+      end
+    end
+
+  end
+
 end
 

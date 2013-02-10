@@ -78,7 +78,6 @@ module DataHut
     # @yield [record, element] lets you control the mapping of data elements to record fields
     # @yieldparam record an OpenStruct that allows you to create fields dynamically on the record as needed. 
     #   These fields will automatically be added to the schema behind the DataHut using the ruby data type you assigned to the record.
-    #   *NOTE* that you must use DateTime or Time objects as Date objects are not supported.
     #   See {http://sequel.rubyforge.org/rdoc/files/doc/schema_modification_rdoc.html Sequel Schema Modification Methods} for 
     #   more information about supported ruby data types you can use.
     # @yieldparam element an element from your data.
@@ -108,7 +107,6 @@ module DataHut
     # @yieldparam record an OpenStruct that fronts the DataHut record.  You may access existing fields on this record or create new 
     #   fields to store synthetic data from a transform pass. 
     #   These fields will automatically be added to the schema behind the DataHut using the ruby data type you assigned to the record.
-    #   *NOTE* that you must use DateTime or Time objects as Date objects are not supported.
     #   See {http://sequel.rubyforge.org/rdoc/files/doc/schema_modification_rdoc.html Sequel Schema Modification Methods} for 
     #   more information about supported ruby data types you can use.
     # @raise [ArgumentError] if you don't provide a block
@@ -150,12 +148,17 @@ module DataHut
       @db[:data_warehouse].update(:dw_processed => true)
     end
 
+    def logger=(logger)
+      raise(ArgumentError, "logger must be a type of Logger.") unless logger.kind_of?(Logger)
+      @db.logger = logger
+    end
+
     private 
 
     def initialize(name)
       @db_file = "#{name}.db"
       @db = Sequel.sqlite(@db_file)
-      #@db.logger = ::Logger.new(STDOUT)
+      
       unless @db.table_exists?(:data_warehouse)
         @db.create_table(:data_warehouse) do
           primary_key :dw_id
@@ -177,6 +180,9 @@ module DataHut
       h = r.marshal_dump
       h.keys.each do |key|
         type = h[key].class
+        unless Sequel::Schema::CreateTableGenerator::GENERIC_TYPES.include?(type)
+          raise(ArgumentError, "DataHut: Ruby type '#{type}' not supported by Sequel. Must be one of the supported types: #{Sequel::Schema::CreateTableGenerator::GENERIC_TYPES.inspect}", caller)
+        end
         unless @db[:data_warehouse].columns.include?(key)
           @db.alter_table(:data_warehouse) do 
             add_column key, type
