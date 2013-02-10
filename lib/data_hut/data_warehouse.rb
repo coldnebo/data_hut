@@ -148,6 +148,14 @@ module DataHut
       @db[:data_warehouse].update(:dw_processed => true)
     end
 
+    # attach a Logger to the underlying Sequel database so that you can debug or monitor database actions.
+    # See {http://sequel.rubyforge.org/rdoc/classes/Sequel/Database.html#method-i-logger-3D Sequel::Database#logger=}.
+    #
+    # @example 
+    #   dh.logger = Logger.new(STDOUT)
+    #
+    # @param logger [Logger] a logger for the underlying Sequel actions.
+    # @raise [ArgumentError] if passed a logger that is not a kind of {http://www.ruby-doc.org/stdlib-1.9.3//libdoc/logger/rdoc/Logger.html Logger}.
     def logger=(logger)
       raise(ArgumentError, "logger must be a type of Logger.") unless logger.kind_of?(Logger)
       @db.logger = logger
