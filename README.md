@@ -90,6 +90,7 @@ Read more about the [Sequel gem](http://sequel.rubyforge.org/rdoc/files/README_r
 
 Taking a popular game like League of Legends and hand-rolling some simple analysis of the champions...
 
+    require 'data_hut'
     require 'nokogiri'
     require 'open-uri'
     require 'pry'
@@ -121,12 +122,14 @@ Taking a popular game like League of Legends and hand-rolling some simple analys
         r.name = champion_page.css('div.page_header_text').text
 
         st = champion_page.css('table.stats_table')
-        names = st.css('td.stats_name').collect{|e| e.text.strip}
+        names = st.css('td.stats_name').collect{|e| e.text.strip.downcase.gsub(/ /,'_')}
         values = st.css('td.stats_value').collect{|e| e.text.strip}
         modifiers = st.css('td.stats_modifier').collect{|e| e.text.strip}
 
+        dh.store_meta(:stats, names)
+
         (0..names.count-1).collect do |i| 
-          stat = (names[i].downcase.gsub(/ /,'_') << "=").to_sym
+          stat = (names[i] + "=").to_sym
           r.send(stat, values[i].to_f)
           stat_per_level = (names[i].downcase.gsub(/ /,'_') << "_per_level=").to_sym
           per_level_value = modifiers[i].match(/\+([\d\.]+)/)[1].to_f rescue 0
@@ -145,18 +148,25 @@ Taking a popular game like League of Legends and hand-rolling some simple analys
       puts "done."
     end
 
+    # connect again in case extract was skipped because the core data already exists:
     dh = DataHut.connect("lolstats")
+
+    # instead of writing out each stat line manually, we can use some metaprogramming along with some metadata to automate this.
+    def total_stat(r,stat)
+      total_stat = ("total_" + stat + "=").to_sym
+      stat_per_level = r.send((stat + "_per_level").to_sym)
+      base = r.send(stat.to_sym)
+      total = base + (stat_per_level * 18.0)
+      r.send(total_stat, total)
+    end
+    # we need to fetch metadata that was written during extract (potentially in a previous process run)
+    stats = dh.fetch_meta(:stats)
 
     puts "first transform"
     dh.transform do |r|
-      r.total_damage = r.damage + (r.damage_per_level * 18.0)
-      r.total_health = r.health + (r.health_per_level * 18.0)
-      r.total_mana = r.mana + (r.mana_per_level * 18.0)
-      r.total_move_speed = r.move_speed + (r.move_speed_per_level * 18.0)
-      r.total_armor = r.armor + (r.armor_per_level * 18.0)
-      r.total_spell_block = r.spell_block + (r.spell_block_per_level * 18.0)
-      r.total_health_regen = r.health_regen + (r.health_regen_per_level * 18.0)
-      r.total_mana_regen = r.mana_regen + (r.mana_regen_per_level * 18.0)
+      stats.each do |stat|
+        total_stat(r,stat)
+      end
       print '.'
     end
 
@@ -184,16 +194,17 @@ Now that we have some data, lets play...
 
 * who has the most base damage?
 
-        [14] pry(main)> ds.order(Sequel.desc(:damage)).limit(5).collect{|c| {c.name => c.damage}}
+        [1] pry(main)> ds.order(Sequel.desc(:damage)).limit(5).collect{|c| {c.name => c.damage}}
         => [{"Taric"=>58.0},
          {"Maokai"=>58.0},
          {"Warwick"=>56.76},
          {"Singed"=>56.65},
          {"Poppy"=>56.3}]
 
+
 * but wait a minute... what about at level 18?  Fortunately, we've transformed our data to add some extra fields for this...
 
-        [3] pry(main)> ds.order(Sequel.desc(:total_damage)).limit(5).collect{|c| {c.name => c.total_damage}}
+        [2] pry(main)> ds.order(Sequel.desc(:total_damage)).limit(5).collect{|c| {c.name => c.total_damage}}
         => [{"Skarner"=>129.70000000000002},
          {"Cho'Gath"=>129.70000000000002},
          {"Kassadin"=>122.5},
@@ -203,7 +214,7 @@ Now that we have some data, lets play...
 * how about using some of the indexes we defined above... like the 'nuke_index' (notice that the assumptions on what make a good
 nuke are subjective, but that's the fun of it; we can model our assumptions and see how the data changes in response.)
 
-        [5] pry(main)> ds.order(Sequel.desc(:nuke_index)).limit(5).collect{|c| {c.name => [c.total_damage, c.total_move_speed, c.total_mana, c.ability_power]}}
+        [3] pry(main)> ds.order(Sequel.desc(:nuke_index)).limit(5).collect{|c| {c.name => [c.total_damage, c.total_move_speed, c.total_mana, c.ability_power]}}
         => [{"Karthus"=>[100.7, 335.0, 1368.0, 10]},
          {"Morgana"=>[114.58, 335.0, 1320.0, 9]},
          {"Ryze"=>[106.0, 335.0, 1240.0, 10]},
@@ -214,13 +225,15 @@ I must have hit close to the mark, because personally I hate each of these champ
 
 * and (now I risk becoming addicted to datahut myself), here's some further guesses with an easy_nuke index:
 
-        [2] pry(main)> ds.order(Sequel.desc(:easy_nuke_index)).limit(5).collect{|c| c.name}
+        [4] pry(main)> ds.order(Sequel.desc(:easy_nuke_index)).limit(5).collect{|c| c.name}
         => ["Sona", "Ryze", "Nasus", "Soraka", "Heimerdinger"]
 
 * makes sense, but is still fascinating... what about my crack at a support_index?
 
-        [3] pry(main)> ds.order(Sequel.desc(:support_index)).limit(5).collect{|c| c.name}
+        [5] pry(main)> ds.order(Sequel.desc(:support_index)).limit(5).collect{|c| c.name}
         => ["Sion", "Diana", "Nunu", "Nautilus", "Amumu"]
+
+
 
 You get the idea now!  *Extract* your data from anywhere, *transform* it however you like and *analyze* it for insights!
 

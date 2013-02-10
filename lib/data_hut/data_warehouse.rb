@@ -161,6 +161,42 @@ module DataHut
       @db.logger = logger
     end
 
+
+
+    # stores metadata
+    #
+    # @param key [Symbol] to lookup the metadata by
+    # @param value [Object] ruby object to store
+    def store_meta(key, value)
+      key = key.to_s if key.instance_of?(Symbol)
+      begin 
+        value = Sequel::SQL::Blob.new(Marshal.dump(value))
+        if (@db[:data_warehouse_meta].where(key: key).count > 0)
+          @db[:data_warehouse_meta].where(key: key).update(value: value)
+        else
+          @db[:data_warehouse_meta].insert(key: key, value: value)
+        end
+      rescue Exception => e
+        raise(ArgumentError, "DataHut: unable to store metadata value #{value.inspect}.", caller)
+      end
+    end
+
+    # retrieves previously stored metadata by key
+    #
+    # @param key [Symbol] to lookup the metadata by
+    # @return [Object] ruby object that was fetched
+    def fetch_meta(key)
+      key = key.to_s if key.instance_of?(Symbol)
+      begin
+        r = @db[:data_warehouse_meta].where(key: key).first
+        value = r[:value] unless r.nil?
+        value = Marshal.load(value) unless value.nil?
+      rescue Exception => e
+        raise(ArgumentError, "DataHut: unable to fetch metadata key #{key}.", caller)
+      end
+      value
+    end
+
     private 
 
     def initialize(name)
@@ -171,6 +207,15 @@ module DataHut
         @db.create_table(:data_warehouse) do
           primary_key :dw_id
           column :dw_processed, TrueClass, :null => false, :default => false
+        end
+      end
+
+      unless @db.table_exists?(:data_warehouse_meta)
+        @db.create_table(:data_warehouse_meta) do
+          primary_key :dw_id
+          String :key
+          index :key
+          blob :value
         end
       end
     end

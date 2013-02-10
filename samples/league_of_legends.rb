@@ -36,12 +36,14 @@ unless File.exists?("lolstats.db")
     r.name = champion_page.css('div.page_header_text').text
 
     st = champion_page.css('table.stats_table')
-    names = st.css('td.stats_name').collect{|e| e.text.strip}
+    names = st.css('td.stats_name').collect{|e| e.text.strip.downcase.gsub(/ /,'_')}
     values = st.css('td.stats_value').collect{|e| e.text.strip}
     modifiers = st.css('td.stats_modifier').collect{|e| e.text.strip}
 
+    dh.store_meta(:stats, names)
+
     (0..names.count-1).collect do |i| 
-      stat = (names[i].downcase.gsub(/ /,'_') << "=").to_sym
+      stat = (names[i] + "=").to_sym
       r.send(stat, values[i].to_f)
       stat_per_level = (names[i].downcase.gsub(/ /,'_') << "_per_level=").to_sym
       per_level_value = modifiers[i].match(/\+([\d\.]+)/)[1].to_f rescue 0
@@ -60,18 +62,25 @@ unless File.exists?("lolstats.db")
   puts "done."
 end
 
+# connect again in case extract was skipped because the core data already exists:
 dh = DataHut.connect("lolstats")
+
+# instead of writing out each stat line manually, we can use some metaprogramming along with some metadata to automate this.
+def total_stat(r,stat)
+  total_stat = ("total_" + stat + "=").to_sym
+  stat_per_level = r.send((stat + "_per_level").to_sym)
+  base = r.send(stat.to_sym)
+  total = base + (stat_per_level * 18.0)
+  r.send(total_stat, total)
+end
+# we need to fetch metadata that was written during extract (potentially in a previous process run)
+stats = dh.fetch_meta(:stats)
 
 puts "first transform"
 dh.transform do |r|
-  r.total_damage = r.damage + (r.damage_per_level * 18.0)
-  r.total_health = r.health + (r.health_per_level * 18.0)
-  r.total_mana = r.mana + (r.mana_per_level * 18.0)
-  r.total_move_speed = r.move_speed + (r.move_speed_per_level * 18.0)
-  r.total_armor = r.armor + (r.armor_per_level * 18.0)
-  r.total_spell_block = r.spell_block + (r.spell_block_per_level * 18.0)
-  r.total_health_regen = r.health_regen + (r.health_regen_per_level * 18.0)
-  r.total_mana_regen = r.mana_regen + (r.mana_regen_per_level * 18.0)
+  stats.each do |stat|
+    total_stat(r,stat)
+  end
   print '.'
 end
 

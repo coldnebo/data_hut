@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.7
+
+* added capability to store and fetch arbitrary metadata from the DataHut. 
+
+  This is useful in the case motivated by the samples/league_of_legends.rb:
+    stat name is known at initial extract time, however
+    subsequent transform runs may or may not have any transient variables for stat names... hence the metadata needs to be stored 
+    somewhere for future transform processing.
+    note: stat name is not of the same cardinality as the data records themselves, so it is truly metadata that governs how the records
+    are understood.
+
 ## 0.0.6 
 
 * externalized the Sequel database logger so that it can be set by DataHut clients.  See DataHut::DataWarehouse#logger=

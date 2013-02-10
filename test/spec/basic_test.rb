@@ -1,5 +1,16 @@
 require_relative File.join(*%w[.. test_helper])
 
+class Foo
+  attr_accessor :bar
+
+  def initialize
+    @time = DateTime.now
+  end
+
+  def what
+    puts "say what?"
+  end
+end
 
 describe DataHut do
   def teardown
@@ -139,9 +150,6 @@ describe DataHut do
 
   describe "nice usage" do  
 
-    class Foo
-    end
-
     it "should provide logging services to see or debug underlying Sequel" do
       dh = DataHut.connect("foo")
 
@@ -170,6 +178,44 @@ describe DataHut do
           r.my_foo = Foo.new
         end
       end
+    end
+
+  end
+
+
+  describe "support adding and retrieving possibly useful metadata" do
+
+    it "should store and retrieve metadata" do
+      dh = DataHut.connect("foo")
+
+      val1 = "wizard"
+      val2 = ["larry", "steve", "barney"]
+      val3 = {one: "for the money", two: "for the show"}
+      val4 = Foo.new
+      
+      dh.store_meta(:harry, val1)
+      dh.store_meta(:users, val2)
+      dh.store_meta(:my_little_hash, val3)
+      dh.store_meta(:an_object, val4)
+      
+      assert_equal val1, dh.fetch_meta(:harry)
+      assert_equal val2, dh.fetch_meta(:users)
+      assert_equal val3, dh.fetch_meta(:my_little_hash)
+
+      assert_raises(MiniTest::Assertion) do 
+        assert_equal val4, dh.fetch_meta(:an_object)
+      end
+
+      assert_equal nil, dh.fetch_meta(:not_there)
+
+      val5 = "muggle"
+      dh.store_meta(:harry, val5)
+      assert_equal val5, dh.fetch_meta(:harry)
+
+      val6 = nil
+      dh.store_meta(:harry, val6)
+      assert_equal val6, dh.fetch_meta(:harry)
+
     end
 
   end
