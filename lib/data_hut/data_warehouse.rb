@@ -177,7 +177,7 @@ module DataHut
           @db[:data_warehouse_meta].insert(key: key, value: value)
         end
       rescue Exception => e
-        raise(ArgumentError, "DataHut: unable to store metadata value #{value.inspect}.", caller)
+        raise(ArgumentError, "DataHut: unable to store metadata value #{value.inspect}: #{e.message}", caller)
       end
     end
 
@@ -192,7 +192,7 @@ module DataHut
         value = r[:value] unless r.nil?
         value = Marshal.load(value) unless value.nil?
       rescue Exception => e
-        raise(ArgumentError, "DataHut: unable to fetch metadata key #{key}.", caller)
+        raise(ArgumentError, "DataHut: unable to fetch metadata key #{key}: #{e.message}", caller)
       end
       value
     end
