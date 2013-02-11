@@ -1,0 +1,7 @@
+source :rubygems
+
+# these are gems used in the samples.
+# install with:
+# $ rake samples
+
+gem 'nokogiri'

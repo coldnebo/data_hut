@@ -1,5 +1,6 @@
 
 # run from the samples dir with: 
+# $ rake samples
 # $ ruby league_of_legends.rb 
 
 require_relative 'sample_helper.rb'
