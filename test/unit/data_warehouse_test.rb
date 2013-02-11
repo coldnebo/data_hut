@@ -25,7 +25,7 @@ class DataWarehouseTest < MiniTest::Unit::TestCase
     end
 
     Marshal.expects(:load).raises(RuntimeError.new("ouch!! again?"))
-    assert_raises(ArgumentError) do
+    assert_raises(RuntimeError) do
       dh.fetch_meta(:bar)
     end
   end

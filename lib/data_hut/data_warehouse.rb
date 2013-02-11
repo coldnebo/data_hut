@@ -192,7 +192,7 @@ module DataHut
         value = r[:value] unless r.nil?
         value = Marshal.load(value) unless value.nil?
       rescue Exception => e
-        raise(ArgumentError, "DataHut: unable to fetch metadata key #{key}: #{e.message}", caller)
+        raise(RuntimeError, "DataHut: unable to fetch metadata key #{key}: #{e.message}", caller)
       end
       value
     end
