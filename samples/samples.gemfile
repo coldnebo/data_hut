@@ -5,3 +5,4 @@ source :rubygems
 # $ rake samples
 
 gem 'nokogiri'
+gem 'haml'

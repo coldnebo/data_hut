@@ -13,3 +13,8 @@ desc "clean up"
 task :clean do
   FileUtils.rm(FileList["samples/**/*.db"], force: true, verbose: true)
 end
+
+desc "install gems for running samples"
+task :samples do
+  system('bundle install --gemfile=samples/samples.gemfile')
+end
