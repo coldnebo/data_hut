@@ -28,28 +28,37 @@ end
 
 
 # boston weather
-url = 'http://forecast.weather.gov/MapClick.php?lat=42.35830&lon=-71.06030&FcstType=digitalDWML'
+url = 'http://forecast.weather.gov/MapClick.php?lat=42.35843&lon=-71.0597732&unit=0&lg=english&FcstType=dwml'
 doc = Nokogiri::HTML(open(url))
 
-# the data in this format is laid out in parallel arrays.
-start_times = doc.xpath('//time-layout/start-valid-time').collect{|n| DateTime.parse(n.text)}
-end_times = doc.xpath('//time-layout/end-valid-time').collect{|n| DateTime.parse(n.text)}
-# in celcius
-temperatures = doc.xpath('//temperature[@type="hourly"]/value').collect{|n| n.text.to_f}
-dew_points = doc.xpath('//temperature[@type="dew point"]/value').collect{|n| n.text.to_f}
-wind_chills = doc.xpath('//temperature[@type="wind chill"]/value').collect{|n| n.text.to_f}
+current_observations = doc.xpath('//data[@type="current observations"]').first
 
 dh = DataHut.connect("weather")
 
+puts "getting current observation:"
 # since the parallel arrays need to be assembled, we'll need to iterate over an index in this case...
-dh.extract((0..start_times.count-1)) do |r, i|
-  r.start_time = start_times[i]
-  r.end_time = end_times[i]
-  r.temperature = temperatures[i]
-  r.dew_point = dew_points[i]
-  r.wind_chill = wind_chills[i]
+dh.extract((0..1)) do |r, i|
+  r.start_time = DateTime.parse(current_observations.xpath('//time-layout/start-valid-time[@period-name="current"]').text)
+  r.temperature = current_observations.xpath('//temperature[@type="apparent"]').text.to_f
+  r.dew_point = current_observations.xpath('//temperature[@type="dew point"]').text.to_f
+  r.wind_speed_kts = current_observations.xpath('//wind-speed[@type="sustained"]').text.to_f
 end
 
-generate_report(dh.dataset)
+dh.transform do |r|
+  r.wind_speed_mph = r.wind_speed_kts * 1.15
+  # from http://en.wikipedia.org/wiki/Wind_chill
+  r.wind_chill = 35.74 + 0.6215*r.temperature - 35.75*(r.wind_speed_mph**0.16) + 0.4275*r.temperature*(r.wind_speed_mph**0.16)
+  puts "  read a value last updated at #{r.start_time}."
+end
+
+dh.transform_complete
+puts "done."
+
+
+ds = dh.dataset
+
+generate_report(ds)
 
 #binding.pry
+
+puts "run weather_station.rb again in a few minutes to record more data."
