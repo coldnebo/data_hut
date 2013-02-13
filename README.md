@@ -6,7 +6,7 @@ DataHut has basic features for small one-off analytics like parsing error logs a
 
 *Extract* your data from anywhere, *transform* it however you like and *analyze* it for insights!
 
-<img src="https://raw.github.com/coldnebo/data_hut/master/samples/weather_files/screenshot.png" width="50%"/>
+<img src="https://raw.github.com/coldnebo/data_hut/master/samples/weather_files/screenshot.png" width="70%"/>  
 *from samples/weather_station.rb*
 
 
