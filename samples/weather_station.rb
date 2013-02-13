@@ -29,6 +29,7 @@ end
 
 # boston weather
 url = 'http://forecast.weather.gov/MapClick.php?lat=42.35843&lon=-71.0597732&unit=0&lg=english&FcstType=dwml'
+
 doc = Nokogiri::HTML(open(url))
 
 current_observations = doc.xpath('//data[@type="current observations"]').first
@@ -53,7 +54,6 @@ end
 
 dh.transform_complete
 puts "done."
-
 
 ds = dh.dataset
 
