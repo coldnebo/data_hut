@@ -3,6 +3,9 @@
 # $ rake samples
 # $ ruby weather_station.rb 
 
+# or every 10 minutes with:
+# $ yes "ruby weather_station.rb; sleep 600"|sh
+
 require_relative 'sample_helper.rb'
 
 require 'data_hut'
