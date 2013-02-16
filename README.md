@@ -98,7 +98,7 @@ Read more about the [Sequel gem](http://sequel.rubyforge.org/rdoc/files/README_r
 
 Taking a popular game like League of Legends and hand-rolling some simple analysis of the champions...
 
-<script src="http://gist-it.appspot.com/github/coldnebo/data_hut/raw/master/samples/league_of_legends.rb"></script>
+* [samples/league_of_legends.rb](https://github.com/coldnebo/data_hut/blob/master/samples/league_of_legends.rb)
 
 Now that we have some data, lets play...
 
