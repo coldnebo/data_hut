@@ -85,6 +85,7 @@ stats = dh.fetch_meta(:stats)
 
 # this transform will automatically create a 'total_<stat_name>' for each raw stat that sums the base + stat_per_level * 18 levels.
 puts "calculate totals for each stat (base + per_level * 18)"
+# 'transform' automatically skips any previous records that were marked processed... we only need to do this once, so no need to repeat.
 dh.transform do |r|
   stats.each do |stat|
     total_stat(r,stat)
@@ -96,6 +97,8 @@ end
 # for example, now that we have totals, we can create indexes for different categories we might think about, 
 # like "nuke" (a champion who does a great deal of damage), or "tenacious" (a champion who is very hard to kill)
 puts "calculate indices for champion categories (nuke, easy_nuke, tenacious and support)"
+# passing 'true' forces the transform to run on all records, even if they have been marked 'processed' by previous runs.
+# use this flag for analytics/modeling that needs to change and be re-run on all your core extract data.
 dh.transform(true) do |r|
   # this index combines the tank dimensions above for best combination (simple Euclidean metric)
   r.nuke_index = r.total_damage * r.total_move_speed * r.total_mana * (r.ability_power)
@@ -105,7 +108,7 @@ dh.transform(true) do |r|
   print '.'
 end
 
-# use once at the end to mark records processed.
+# use once at the end to mark any unprocessed records as processed.
 dh.transform_complete
 puts "transforms complete"
 
