@@ -71,7 +71,7 @@ And here's some of the other powerful things you can do with a Sequel::Dataset:
     [5] pry(main)> ds.min(:age)
     => 27
 
-But wait, you can also name these collections:
+But you can also name subsets of data and work with those instead:
 
     [6] pry(main)> ineligible = ds.where(eligible: false)
     => #<Sequel::SQLite::Dataset: "SELECT * FROM `data_warehouse` WHERE (`eligible` = 'f')">
@@ -82,7 +82,7 @@ But wait, you can also name these collections:
     => [#< @values={:dw_id=>3, :name=>"fred", :age=>44, :eligible=>false}>,
      #< @values={:dw_id=>2, :name=>"phil", :age=>31, :eligible=>false}>]
 
-The results are always Sequel::Model objects, so you can access them with object notation:
+And results remain Sequel::Model objects, so you can access fields with object notation:
 
     [32] pry(main)> record = ineligible.order(Sequel.desc(:age)).first
     => #< @values={:dw_id=>3, :name=>"fred", :age=>44, :eligible=>false}>
@@ -92,11 +92,12 @@ The results are always Sequel::Model objects, so you can access them with object
     => 44
 
 
-Read more about the [Sequel gem](http://sequel.rubyforge.org/rdoc/files/README_rdoc.html) to determine what operations you can perform on a DataHut dataset.
+Read more about the [Sequel gem](http://sequel.rubyforge.org/) to determine what operations you can perform on a DataHut dataset.
 
 ## A More Ambitious Example...
 
-Taking a popular game like League of Legends and hand-rolling some simple analysis of the champions...
+Taking a popular game like League of Legends and hand-rolling some simple analysis of the champions.  Look at the following sample
+code:
 
 * [samples/league_of_legends.rb](https://github.com/coldnebo/data_hut/blob/master/samples/league_of_legends.rb)
 
