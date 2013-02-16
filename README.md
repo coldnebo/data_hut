@@ -7,7 +7,7 @@ DataHut has basic features for small one-off analytics like parsing error logs a
 *Extract* your data from anywhere, *transform* it however you like and *analyze* it for insights!
 
 <img src="https://raw.github.com/coldnebo/data_hut/master/samples/weather_files/screenshot.png" width="70%"/>  
-*from samples/weather_station.rb*
+*from [samples/weather_station.rb](https://github.com/coldnebo/data_hut/blob/master/samples/weather_station.rb)*
 
 
 ## Installation
@@ -53,9 +53,14 @@ Setting up a datahut is easy...
 
     binding.pry
 
-The datahut *dataset* is a Sequel::Model backed by the data warehouse you just created. 
+Data_hut provides access to the underlying [Sequel::Dataset](http://sequel.rubyforge.org/rdoc/classes/Sequel/Dataset.html) using
+a Sequel::Model binding.  This allows you to query individual fields and stats from the dataset, but also returns rows as objects that are accessed with the same uniform object syntax you used for extracting and transforming... i.e.:
 
-And here's the kinds of powerful things you can do:
+    [1] pry(main)> person = ds.first
+    [2] pry(main)> [person.name, person.age]
+    => ["barney", 27]
+
+And here's some of the other powerful things you can do with a Sequel::Dataset:
 
     [2] pry(main)> ds.where(eligible: false).count
     => 2
@@ -66,7 +71,7 @@ And here's the kinds of powerful things you can do:
     [5] pry(main)> ds.min(:age)
     => 27
 
-But wait, you can name these collections:
+But wait, you can also name these collections:
 
     [6] pry(main)> ineligible = ds.where(eligible: false)
     => #<Sequel::SQLite::Dataset: "SELECT * FROM `data_warehouse` WHERE (`eligible` = 'f')">
@@ -77,7 +82,7 @@ But wait, you can name these collections:
     => [#< @values={:dw_id=>3, :name=>"fred", :age=>44, :eligible=>false}>,
      #< @values={:dw_id=>2, :name=>"phil", :age=>31, :eligible=>false}>]
 
-The results are Sequel::Model objects, so you can treat them as such:
+The results are always Sequel::Model objects, so you can access them with object notation:
 
     [32] pry(main)> record = ineligible.order(Sequel.desc(:age)).first
     => #< @values={:dw_id=>3, :name=>"fred", :age=>44, :eligible=>false}>
