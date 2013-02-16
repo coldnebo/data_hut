@@ -12,7 +12,8 @@ require 'pry'
 
 root = 'http://na.leagueoflegends.com'
 
-# load the data once... (manually delete it to refresh)
+# we can run this sample more than once to do different transforms and analysis, but we 
+# want to load the data only once... (manually delete 'lolstats.db' to reload the data)
 unless File.exists?("lolstats.db")
   dh = DataHut.connect("lolstats")
 
@@ -41,6 +42,9 @@ unless File.exists?("lolstats.db")
     values = st.css('td.stats_value').collect{|e| e.text.strip}
     modifiers = st.css('td.stats_modifier').collect{|e| e.text.strip}
 
+    # DataHut also allows you to store metadata for the data warehouse during any processing phase for later retrieval.
+    # Since we extract the data only once, but may need stats names for subsequent transforms, we can store the 
+    # stats names for later in the metadata:
     dh.store_meta(:stats, names)
 
     (0..names.count-1).collect do |i| 
@@ -63,7 +67,8 @@ unless File.exists?("lolstats.db")
   puts "done."
 end
 
-# connect again in case extract was skipped because the core data already exists:
+# make sure we are connected in case the db exists and has already be extracted 
+# (in which case, we are only doing analytics)
 dh = DataHut.connect("lolstats")
 
 # instead of writing out each stat line manually, we can use some metaprogramming along with some metadata to automate this.
@@ -74,10 +79,12 @@ def total_stat(r,stat)
   total = base + (stat_per_level * 18.0)
   r.send(total_stat, total)
 end
-# we need to fetch metadata that was written during extract (potentially in a previous process run)
+
+# we can fetch the metadata that was written during the extract phase and use it with our total_stat() method above. 
 stats = dh.fetch_meta(:stats)
 
-puts "first transform"
+# this transform will automatically create a 'total_<stat_name>' for each raw stat that sums the base + stat_per_level * 18 levels.
+puts "calculate totals for each stat (base + per_level * 18)"
 dh.transform do |r|
   stats.each do |stat|
     total_stat(r,stat)
@@ -85,8 +92,10 @@ dh.transform do |r|
   print '.'
 end
 
-puts "second transform"
 # there's no need to do transforms all in one batch either... you can layer them...
+# for example, now that we have totals, we can create indexes for different categories we might think about, 
+# like "nuke" (a champion who does a great deal of damage), or "tenacious" (a champion who is very hard to kill)
+puts "calculate indices for champion categories (nuke, easy_nuke, tenacious and support)"
 dh.transform(true) do |r|
   # this index combines the tank dimensions above for best combination (simple Euclidean metric)
   r.nuke_index = r.total_damage * r.total_move_speed * r.total_mana * (r.ability_power)
@@ -102,6 +111,7 @@ puts "transforms complete"
 
 ds = dh.dataset
 
+# now you can explore the results from the console:
 binding.pry
 
 puts "done."
