@@ -53,7 +53,7 @@ Setting up a datahut is easy...
 
     binding.pry
 
-Data_hut provides access to the underlying [Sequel::Dataset](http://sequel.rubyforge.org/rdoc/classes/Sequel/Dataset.html) using
+DataHut provides access to the underlying [Sequel::Dataset](http://sequel.rubyforge.org/rdoc/classes/Sequel/Dataset.html) using
 a Sequel::Model binding.  This allows you to query individual fields and stats from the dataset, but also returns rows as objects that are accessed with the same uniform object syntax you used for extracting and transforming... i.e.:
 
     [1] pry(main)> person = ds.first
@@ -92,7 +92,7 @@ The results are always Sequel::Model objects, so you can access them with object
     => 44
 
 
-Read more about the [Sequel gem](http://sequel.rubyforge.org/rdoc/files/README_rdoc.html) to determine what operations you can perform on a datahut dataset.
+Read more about the [Sequel gem](http://sequel.rubyforge.org/rdoc/files/README_rdoc.html) to determine what operations you can perform on a DataHut dataset.
 
 ## A More Ambitious Example...
 
@@ -231,7 +231,7 @@ nuke are subjective, but that's the fun of it; we can model our assumptions and 
 
 I must have hit close to the mark, because personally I hate each of these champions when I go up against them!  ;)
 
-* and (now I risk becoming addicted to datahut myself), here's some further guesses with an easy_nuke index:
+* and (now I risk becoming addicted to DataHut myself), here's some further guesses with an easy_nuke index:
 
         [4] pry(main)> ds.order(Sequel.desc(:easy_nuke_index)).limit(5).collect{|c| c.name}
         => ["Sona", "Ryze", "Nasus", "Soraka", "Heimerdinger"]
