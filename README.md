@@ -101,7 +101,9 @@ code:
 
 * [samples/league_of_legends.rb](https://github.com/coldnebo/data_hut/blob/master/samples/league_of_legends.rb)
 
-Now that we have some data, lets play...
+Running this sample scrapes some game statistics from an official website and then transforms this base data with 
+extra fields containing different totals and indices that we can construct however we like. 
+Now that we have some data extracted and some initial transforms defined, lets play with the results...
 
 * who has the most base damage?
 
@@ -122,8 +124,7 @@ Now that we have some data, lets play...
          {"Taric"=>121.0},
          {"Alistar"=>120.19}]
 
-* how about using some of the indexes we defined above... like the 'nuke_index' (notice that the assumptions on what make a good
-nuke are subjective, but that's the fun of it; we can model our assumptions and see how the data changes in response.)
+* how about using some of the indices we defined?... for instance, if we want to know which champions produce the greatest damage we could try sorting by our 'nuke_index', (notice that the assumptions on what make a good 'nuke' are subjective, but that's the fun of it; we can model our assumptions and see how the data changes in response.)
 
         [3] pry(main)> ds.order(Sequel.desc(:nuke_index)).limit(5).collect{|c| {c.name => [c.total_damage, c.total_move_speed, c.total_mana, c.ability_power]}}
         => [{"Karthus"=>[100.7, 335.0, 1368.0, 10]},
@@ -132,7 +133,7 @@ nuke are subjective, but that's the fun of it; we can model our assumptions and 
          {"Karma"=>[109.4, 335.0, 1320.0, 9]},
          {"Lux"=>[109.4, 340.0, 1150.0, 10]}]
 
-I must have hit close to the mark, because personally I hate each of these champions when I go up against them!  ;)
+From my experience in the game, these champions are certainly heavy hitters.  What do you think?
 
 * and (now I risk becoming addicted to DataHut myself), here's some further guesses with an easy_nuke index:
 
