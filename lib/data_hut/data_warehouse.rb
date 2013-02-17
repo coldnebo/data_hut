@@ -82,6 +82,7 @@ module DataHut
     #   more information about supported ruby data types you can use.
     # @yieldparam element an element from your data.
     # @raise [ArgumentError] if you don't provide a block
+    # @return [void]
     def extract(data)
       raise(ArgumentError, "a block is required for extract.", caller) unless block_given?
 
@@ -110,6 +111,7 @@ module DataHut
     #   See {http://sequel.rubyforge.org/rdoc/files/doc/schema_modification_rdoc.html Sequel Schema Modification Methods} for 
     #   more information about supported ruby data types you can use.
     # @raise [ArgumentError] if you don't provide a block
+    # @return [void]
     def transform(forced=false)
       raise(ArgumentError, "a block is required for transform.", caller) unless block_given?
 
@@ -144,6 +146,8 @@ module DataHut
     #      transform_complete (marks the update complete)
     #      dh.dataset is used to visualize graphs with d3.js
     #   end
+    #
+    # @return [void]
     def transform_complete
       @db[:data_warehouse].update(:dw_processed => true)
     end
@@ -156,18 +160,21 @@ module DataHut
     #
     # @param logger [Logger] a logger for the underlying Sequel actions.
     # @raise [ArgumentError] if passed a logger that is not a kind of {http://www.ruby-doc.org/stdlib-1.9.3//libdoc/logger/rdoc/Logger.html Logger}.
+    # @return [void]
     def logger=(logger)
       raise(ArgumentError, "logger must be a type of Logger.") unless logger.kind_of?(Logger)
       @db.logger = logger
     end
 
-
-
-    # stores any Ruby object as metadata in the datahut. See {https://github.com/coldnebo/data_hut#metadata-object-store Metadata Object Store} for more information.
-    # See also: {http://www.ruby-doc.org/core-1.9.3/Marshal.html#method-c-dump Marshall#dump}.
+    # stores any Ruby object as metadata in the datahut.
     #
     # @param key [Symbol] to reference the metadata by
     # @param value [Object] ruby object to store in metadata
+    # @return [void]
+    # @note Because the datastore can support any Ruby object (including custom ones) it is up to 
+    #   the caller to make sure that custom classes are in context before storage and fetch.  i.e. if you 
+    #   store a custom object and then fetch it in a context that doesn't have that class loaded, you'll get an error.  
+    #   For this reason it is safest to use standard Ruby types (e.g. Array, Hash, etc.) that will always be present.
     def store_meta(key, value)
       key = key.to_s if key.instance_of?(Symbol)
       begin 
@@ -182,11 +189,14 @@ module DataHut
       end
     end
 
-    # retrieves any Ruby object stored as metadata. See {https://github.com/coldnebo/data_hut#metadata-object-store Metadata Object Store} for more information.
-    # See also: {http://www.ruby-doc.org/core-1.9.3/Marshal.html#method-c-load Marshall#load}.
+    # retrieves any Ruby object stored as metadata.
     #
     # @param key [Symbol] to lookup the metadata by
     # @return [Object] ruby object that was fetched from metadata
+    # @note Because the datastore can support any Ruby object (including custom ones) it is up to 
+    #   the caller to make sure that custom classes are in context before storage and fetch.  i.e. if you 
+    #   store a custom object and then fetch it in a context that doesn't have that class loaded, you'll get an error.  
+    #   For this reason it is safest to use standard Ruby types (e.g. Array, Hash, etc.) that will always be present.
     def fetch_meta(key)
       key = key.to_s if key.instance_of?(Symbol)
       begin

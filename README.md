@@ -156,9 +156,7 @@ Have fun!
 
 DataHut also supports a basic Ruby object store for storing persistent metadata that might be useful during extract and transform passes.
 
-Caveats: Because the datastore can support any Ruby object (including custom ones) it is up to the caller to make sure that custom classes are in context before storage and fetch.  i.e. if you store a custom object and then fetch it in a context that doesn't have that class loaded, you'll get an error.  For this reason it is safest to use standard Ruby types (e.g. Array, Hash, etc.) that will always be present.
-
-Examples:
+*Examples:*
 
 * [samples/league_of_legends.rb](https://github.com/coldnebo/data_hut/blob/master/samples/league_of_legends.rb):
 
@@ -176,6 +174,8 @@ Examples:
         # later... we can fetch the metadata that was written during the extract phase and use it... 
         stats = dh.fetch_meta(:stats)
         # stats => ["damage", "health", "mana", "move_speed", "armor", "spell_block", "health_regen", "mana_regen"]
+
+**Caveats:** Because the datastore can support any Ruby object (including custom ones) it is up to the caller to make sure that custom classes are in context before storage and fetch.  i.e. if you store a custom object and then fetch it in a context that doesn't have that class loaded, you'll get an error.  For this reason it is safest to use standard Ruby types (e.g. Array, Hash, etc.) that will always be present.
 
 See {DataHut::DataWarehouse#store_meta} and {DataHut::DataWarehouse#fetch_meta} for details.
 
