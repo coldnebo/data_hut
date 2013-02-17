@@ -135,12 +135,12 @@ Now that we have some data extracted and some initial transforms defined, lets p
 
 From my experience in the game, these champions are certainly heavy hitters.  What do you think?
 
-* and (now I risk becoming addicted to DataHut myself), here's some further guesses with an easy_nuke index:
+* and (now I risk becoming addicted to DataHut myself), here's some further guesses with an 'easy_nuke' index (champions that have a lot of damage, but are also less difficult to play):
 
         [4] pry(main)> ds.order(Sequel.desc(:easy_nuke_index)).limit(5).collect{|c| c.name}
         => ["Sona", "Ryze", "Nasus", "Soraka", "Heimerdinger"]
 
-* makes sense, but is still fascinating... what about my crack at a support_index?
+* makes sense, but is still fascinating... what about my crack at a support_index (champions that have a lot of regen, staying power, etc.)?
 
         [5] pry(main)> ds.order(Sequel.desc(:support_index)).limit(5).collect{|c| c.name}
         => ["Sion", "Diana", "Nunu", "Nautilus", "Amumu"]
