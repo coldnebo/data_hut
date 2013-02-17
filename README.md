@@ -115,7 +115,7 @@ Now that we have some data extracted and some initial transforms defined, lets p
          {"Poppy"=>56.3}]
 
 
-* but wait a minute... what about at level 18?  Fortunately, we've transformed our data to add some extra fields for this...
+* but wait a minute... what about at level 18?  Fortunately, we've transformed our data to add some extra "total" fields for each stat...
 
         [2] pry(main)> ds.order(Sequel.desc(:total_damage)).limit(5).collect{|c| {c.name => c.total_damage}}
         => [{"Skarner"=>129.70000000000002},
