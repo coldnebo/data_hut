@@ -160,23 +160,24 @@ Caveats: Because the datastore can support any Ruby object (including custom one
 
 Examples:
 
-* [samples/league_of_legends.rb](https://github.com/coldnebo/data_hut/blob/master/samples/league_of_legends.rb)
+* [samples/league_of_legends.rb](https://github.com/coldnebo/data_hut/blob/master/samples/league_of_legends.rb):
 
         dh.extract(urls) do |r, url|
           ...
-          names = [:damage, :health, ...]
+          # names => ["damage", "health", "mana", "move_speed", "armor", "spell_block", "health_regen", "mana_regen"]
 
           # DataHut also allows you to store metadata for the data warehouse during any processing phase for later retrieval.
           # Since we extract the data only once, but may need stats names for subsequent transforms, we can store the 
-          # stats names for later in the metadata:
+          # stats names in the metadata for later use:
           dh.store_meta(:stats, names)
           ...
         end
-        ...
-        # we can fetch the metadata that was written during the extract phase and use it with our total_stat() method above. 
+        ... 
+        # later... we can fetch the metadata that was written during the extract phase and use it... 
         stats = dh.fetch_meta(:stats)
+        # stats => ["damage", "health", "mana", "move_speed", "armor", "spell_block", "health_regen", "mana_regen"]
 
-See {DataHut::DataWarehouse#store_meta(k, v)} and {DataHut::DataWarehouse#fetch_meta(k)} for details.
+See {DataHut::DataWarehouse#store_meta} and {DataHut::DataWarehouse#fetch_meta} for details.
 
 ## TODOS
 

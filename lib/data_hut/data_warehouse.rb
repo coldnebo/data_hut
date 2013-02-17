@@ -102,7 +102,7 @@ module DataHut
     # 
     # @param forced if set to 'true', this transform will iterate over records already marked processed.  This can be useful for 
     #   layers of transforms that deal with analytics where the analytical model may need to rapidly change as you explore the data.
-    #   See the second transform in {file/README.md#A_More_Ambitious_Example___}.
+    #   See the second transform in {https://github.com/coldnebo/data_hut/blob/master/samples/league_of_legends.rb#L102 samples/league_of_legends.rb:102}.
     # @yield [record] lets you modify the DataHut record
     # @yieldparam record an OpenStruct that fronts the DataHut record.  You may access existing fields on this record or create new 
     #   fields to store synthetic data from a transform pass. 
@@ -163,7 +163,7 @@ module DataHut
 
 
 
-    # stores any Ruby object as metadata in the datahut. See {file/README.md#Metadata_Object_Store Metadata Object Store} for more information.
+    # stores any Ruby object as metadata in the datahut. See {https://github.com/coldnebo/data_hut#metadata-object-store Metadata Object Store} for more information.
     # See also: {http://www.ruby-doc.org/core-1.9.3/Marshal.html#method-c-dump Marshall#dump}.
     #
     # @param key [Symbol] to reference the metadata by
@@ -182,7 +182,7 @@ module DataHut
       end
     end
 
-    # retrieves any Ruby object stored as metadata. See {file/README.md#Metadata_Object_Store Metadata Object Store} for more information.
+    # retrieves any Ruby object stored as metadata. See {https://github.com/coldnebo/data_hut#metadata-object-store Metadata Object Store} for more information.
     # See also: {http://www.ruby-doc.org/core-1.9.3/Marshal.html#method-c-load Marshall#load}.
     #
     # @param key [Symbol] to lookup the metadata by
