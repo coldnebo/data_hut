@@ -3,7 +3,7 @@
 # $ rake samples
 # $ ruby league_of_legends.rb 
 
-require_relative 'sample_helper.rb'
+require_relative 'common/sample_helper.rb'
 
 require 'data_hut'
 require 'nokogiri'

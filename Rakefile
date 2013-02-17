@@ -16,5 +16,5 @@ end
 
 desc "install gems for running samples"
 task :samples do
-  system('bundle install --gemfile=samples/samples.gemfile')
+  system('bundle install --gemfile=samples/common/samples.gemfile')
 end
