@@ -14,20 +14,23 @@ require 'json'
 
 
 def generate_report(ds)
-  @data = ds.order(:start_time).collect{|d| d.to_hash}.to_json
-  @data = %{ var data = #{@data}; }
-  @style = File.read("weather_files/weather.css")
-  @app = File.read("weather_files/weather.js")
-  engine = Haml::Engine.new(File.read("weather_files/report.html.haml"))
+  @title      = "Boston Weather Forecast"
+  @h1         = "Forecasted Temperatures Report for Boston, MA, USA"
+  @data       = ds.order(:start_time).collect{|d| d.to_hash}.to_json
+  @css        = File.read("weather_files/weather.css")
+  @js         = File.read("weather_files/weather.js")
+  engine      = Haml::Engine.new(File.read("common/report.html.haml"))
   report_name = "weather_report.html"
+
   File.open(report_name, "w") do |f|
     f.puts engine.render(self)
   end
+
   puts "rendered '#{report_name}'. open in your favorite browser."
 end
 
 
-# boston weather
+# boston weather forecast for the next 7 days
 url = 'http://forecast.weather.gov/MapClick.php?lat=42.35830&lon=-71.06030&FcstType=digitalDWML'
 
 doc = Nokogiri::HTML(open(url))
