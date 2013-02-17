@@ -163,10 +163,11 @@ module DataHut
 
 
 
-    # stores metadata
+    # stores any Ruby object as metadata in the datahut. See {file/README.md#Metadata_Object_Store Metadata Object Store} for more information.
+    # See also: {http://www.ruby-doc.org/core-1.9.3/Marshal.html#method-c-dump Marshall#dump}.
     #
-    # @param key [Symbol] to lookup the metadata by
-    # @param value [Object] ruby object to store
+    # @param key [Symbol] to reference the metadata by
+    # @param value [Object] ruby object to store in metadata
     def store_meta(key, value)
       key = key.to_s if key.instance_of?(Symbol)
       begin 
@@ -181,10 +182,11 @@ module DataHut
       end
     end
 
-    # retrieves previously stored metadata by key
+    # retrieves any Ruby object stored as metadata. See {file/README.md#Metadata_Object_Store Metadata Object Store} for more information.
+    # See also: {http://www.ruby-doc.org/core-1.9.3/Marshal.html#method-c-load Marshall#load}.
     #
     # @param key [Symbol] to lookup the metadata by
-    # @return [Object] ruby object that was fetched
+    # @return [Object] ruby object that was fetched from metadata
     def fetch_meta(key)
       key = key.to_s if key.instance_of?(Symbol)
       begin

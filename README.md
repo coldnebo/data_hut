@@ -152,6 +152,32 @@ You get the idea now!  *Extract* your data from anywhere, *transform* it however
 Have fun!
 
 
+## Metadata Object Store
+
+DataHut also supports a basic Ruby object store for storing persistent metadata that might be useful during extract and transform passes.
+
+Caveats: Because the datastore can support any Ruby object (including custom ones) it is up to the caller to make sure that custom classes are in context before storage and fetch.  i.e. if you store a custom object and then fetch it in a context that doesn't have that class loaded, you'll get an error.  For this reason it is safest to use standard Ruby types (e.g. Array, Hash, etc.) that will always be present.
+
+Examples:
+
+* [samples/league_of_legends.rb](https://github.com/coldnebo/data_hut/blob/master/samples/league_of_legends.rb)
+
+    dh.extract(urls) do |r, url|
+      ...
+      names = [:damage, :health, ...]
+
+      # DataHut also allows you to store metadata for the data warehouse during any processing phase for later retrieval.
+      # Since we extract the data only once, but may need stats names for subsequent transforms, we can store the 
+      # stats names for later in the metadata:
+      dh.store_meta(:stats, names)
+      ...
+    end
+    ...
+    # we can fetch the metadata that was written during the extract phase and use it with our total_stat() method above. 
+    stats = dh.fetch_meta(:stats)
+
+See {DataHut::DataWarehouse#store_meta(k, v)} and {DataHut::DataWarehouse#fetch_meta(k)} for details.
+
 ## TODOS
 
 * further optimizations
