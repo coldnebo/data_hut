@@ -162,19 +162,19 @@ Examples:
 
 * [samples/league_of_legends.rb](https://github.com/coldnebo/data_hut/blob/master/samples/league_of_legends.rb)
 
-    dh.extract(urls) do |r, url|
-      ...
-      names = [:damage, :health, ...]
+        dh.extract(urls) do |r, url|
+          ...
+          names = [:damage, :health, ...]
 
-      # DataHut also allows you to store metadata for the data warehouse during any processing phase for later retrieval.
-      # Since we extract the data only once, but may need stats names for subsequent transforms, we can store the 
-      # stats names for later in the metadata:
-      dh.store_meta(:stats, names)
-      ...
-    end
-    ...
-    # we can fetch the metadata that was written during the extract phase and use it with our total_stat() method above. 
-    stats = dh.fetch_meta(:stats)
+          # DataHut also allows you to store metadata for the data warehouse during any processing phase for later retrieval.
+          # Since we extract the data only once, but may need stats names for subsequent transforms, we can store the 
+          # stats names for later in the metadata:
+          dh.store_meta(:stats, names)
+          ...
+        end
+        ...
+        # we can fetch the metadata that was written during the extract phase and use it with our total_stat() method above. 
+        stats = dh.fetch_meta(:stats)
 
 See {DataHut::DataWarehouse#store_meta(k, v)} and {DataHut::DataWarehouse#fetch_meta(k)} for details.
 
