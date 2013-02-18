@@ -83,6 +83,8 @@ module DataHut
     # @yieldparam element an element from your data.
     # @raise [ArgumentError] if you don't provide a block
     # @return [void]
+    # @note Duplicate records (all fields and values must match) are automatically not inserted at the end of an extract iteration. You may
+    #   also skip duplicate extracts early in the iteration by using {#not_unique}.
     def extract(data)
       raise(ArgumentError, "a block is required for extract.", caller) unless block_given?
 
@@ -209,6 +211,24 @@ module DataHut
       value
     end
 
+    # used to determine if the specified fields and values are unique in the datahut.
+    # 
+    # @example
+    #   dh.extract(data) do |r, d|
+    #     next if dh.not_unique(name: d[:name])
+    #     r.name = d[:name]
+    #     r.age = d[:age]
+    #     ...
+    #   end
+    #
+    # @note exactly duplicate records are automatically skipped at the end of an extract iteration (see {#extract}). This 
+    #   method is useful if an extract iteration takes a long time and you want to skip duplicates early in the iteration.
+    # @param hash [Hash] of the key, value pairs specifying a partial record by which to consider records unique.
+    # @return [Boolean] true if the {field: value} already exists, false otherwise (including if the column doesn't yet exist.)
+    def not_unique(hash)
+      @db[:data_warehouse].where(hash).count > 0 rescue false
+    end
+
     private 
 
     def initialize(name)
@@ -236,7 +256,7 @@ module DataHut
       adapt_schema(r)
       h = r.marshal_dump
       # don't insert dups
-      unless @db[:data_warehouse].where(h).count > 0
+      unless not_unique(h)
         @db[:data_warehouse].insert(h)
       end
     end

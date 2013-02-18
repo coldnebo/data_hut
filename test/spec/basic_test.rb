@@ -71,6 +71,28 @@ describe DataHut do
       assert_equal 3, dh.dataset.count
     end
 
+    it "should support early skipping" do
+      dh = DataHut.connect("foo")
+
+      data = [{name: "barney", age: 27},
+              {name: "barney", age: 27},
+              {name: "phil", age: 31},
+              {name: "phil", age: 31},
+              {name: "fred", age: 44}]
+ 
+      called = 0
+      dh.extract(data) do |r, d|
+        next if dh.not_unique(name: d[:name])
+        r.name = d[:name]
+        r.age = d[:age]
+        called += 1
+      end
+
+      assert_equal 3, dh.dataset.count
+      assert_equal 3, called
+    end
+
+
     it "should add new records on subsequent extracts" do
       dh = DataHut.connect("foo")
 

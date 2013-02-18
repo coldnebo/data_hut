@@ -12,6 +12,7 @@ task :default => :test
 desc "clean up"
 task :clean do
   FileUtils.rm(FileList["samples/**/*.db"], force: true, verbose: true)
+  FileUtils.rm(FileList["samples/*.html"], force: true, verbose: true)
 end
 
 desc "install gems for running samples"
