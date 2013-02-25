@@ -23,13 +23,16 @@ unless File.exists?("lolstats.db")
 
   # keep the powers for later since they are on different pages.
   powers = {}
+  thumbnails = {}
   champions_page.css('table.champion_item').each do |c|
     name        = c.css('td.description span.highlight a').text
     attack      = c.css('td.graphing td.filled_attack').count
     health      = c.css('td.graphing td.filled_health').count
     spells      = c.css('td.graphing td.filled_spells').count
     difficulty  = c.css('td.graphing td.filled_difficulty').count
+    thumbnail   = c.css('td.champion a img/@src').to_s
     powers.store(name, {attack_power: attack, defense_power: health, ability_power: spells, difficulty: difficulty})
+    thumbnails.store(name,thumbnail)
   end
 
   puts "loading champion data"
@@ -41,6 +44,7 @@ unless File.exists?("lolstats.db")
     names = st.css('td.stats_name').collect{|e| e.text.strip.downcase.gsub(/ /,'_')}
     values = st.css('td.stats_value').collect{|e| e.text.strip}
     modifiers = st.css('td.stats_modifier').collect{|e| e.text.strip}
+    lore = champion_page.css('table.lore_table td.champion_description').text
 
     # DataHut also allows you to store metadata for the data warehouse during any processing phase for later retrieval.
     # Since we extract the data only once, but may need stats names for subsequent transforms, we can store the 
@@ -61,6 +65,8 @@ unless File.exists?("lolstats.db")
     r.defense_power = power[:defense_power]
     r.ability_power = power[:ability_power]
     r.difficulty = power[:difficulty]
+    r.lore = lore
+    r.thumbnail = thumbnails[r.name]
 
     print "."
   end
