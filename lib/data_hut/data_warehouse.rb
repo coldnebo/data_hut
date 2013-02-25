@@ -85,6 +85,9 @@ module DataHut
     # @return [void]
     # @note Duplicate records (all fields and values must match) are automatically not inserted at the end of an extract iteration. You may
     #   also skip duplicate extracts early in the iteration by using {#not_unique}.
+    # @note Fields with nil values in records are skipped because the underlying database defaults these to 
+    #   nil already. However you must have at least one non-nil value in order for the field to be automatically created,
+    #   otherwise subsequent transform layers may report errors on trying to access the field.
     def extract(data)
       raise(ArgumentError, "a block is required for extract.", caller) unless block_given?
 
@@ -130,10 +133,10 @@ module DataHut
         r = OpenStruct.new(h)
         # and let the transformer modify it...
         yield r
-        # now add any new transformation fields to the schema...
-        adapt_schema(r)
         # get the update hash from the openstruct
-        h = r.marshal_dump
+        h = ostruct_to_hash(r)
+        # now add any new transformation fields to the schema...
+        adapt_schema(h)
         # and use it to update the record
         @db[:data_warehouse].where(dw_id: dw_id).update(h)
       end
@@ -253,16 +256,20 @@ module DataHut
     end
 
     def store(r)
-      adapt_schema(r)
-      h = r.marshal_dump
+      h = ostruct_to_hash(r)
+      adapt_schema(h)
       # don't insert dups
       unless not_unique(h)
         @db[:data_warehouse].insert(h)
       end
     end
 
-    def adapt_schema(r)
+    def ostruct_to_hash(r)
       h = r.marshal_dump
+      h.reject{|k,v| v.nil?}  # you can't define a column type "NilClass", so strip these before adapting the schema
+    end
+
+    def adapt_schema(h)
       h.keys.each do |key|
         type = h[key].class
         unless Sequel::Schema::CreateTableGenerator::GENERIC_TYPES.include?(type)

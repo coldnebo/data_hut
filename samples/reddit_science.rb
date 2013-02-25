@@ -9,6 +9,8 @@ require 'nokogiri'
 require 'open-uri'
 require 'pry'
 
+# fix for open-uri, uri with pipes: http://stackoverflow.com/a/5287528/555187
+URI::DEFAULT_PARSER = URI::Parser.new(:UNRESERVED => URI::REGEXP::PATTERN::UNRESERVED + '|')
 
 url = "http://www.reddit.com/r/science.rss"
 
@@ -46,8 +48,29 @@ dh.extract(doc.xpath('//item')) do |r, item|
 end
 
 
+dh.transform(true) do |r|
+  topic = case r.article_body
+    when /physic/ then "physics" 
+    when /biolog/ then "biology"
+    when /astronom/ then "astronomy"
+    when /chemist/ then "chemistry"
+    when /engineer/ then "engineering"
+    else 'unclassified'
+  end
+  #binding.pry
+  r.topic = topic
+end
+
+dh.transform_complete
+
+
 ds = dh.dataset
 
+
+puts ds.where(topic: "unclassified").collect {|e| e.title}.join("\n")
+
+puts "unclassified:"
+puts ds.where(topic: "unclassified").count
 
 binding.pry
 

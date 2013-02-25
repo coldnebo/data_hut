@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.0.8 
+
+* handle unsanitized nil values properly - If your input data has occasional nil values during extract or transform, you may have seen:
+    DataHut: Ruby type 'NilClass' not supported by Sequel...
+  DataHut now handles nil values instead of raising this exception so that it is easier to work with unsanitized datasets.
+
+* added `DataHut::DataWarehouse#non_unique` which allows you to specify any test of uniqueness for early skipping during transform or extract phases.  DataHut has duplicate detection built-in, i.e. it doesn't allow identical records to be inserted.  However in the past, you had to wait for all the fields to be added or transformed before this detection was done.  `non-unique` allows you to define more specific uniqueness paramters for early skipping without going through all that.  i.e. you have a feed where you know a dup is some kind of GUID... simply test if the GUID is unique *before* going any further...
+
+        dh.extract(data) do |r, d|
+          next if dh.not_unique(guid: d[:guid])
+          r.guid = d[:guid]
+          r.name = d[:name]
+          r.age = d[:age]
+          ...
+        end
+
 ## 0.0.7
 
 * added capability to store and fetch arbitrary metadata from the DataHut. 

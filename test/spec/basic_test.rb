@@ -200,6 +200,26 @@ describe DataHut do
           r.my_foo = Foo.new
         end
       end
+
+    end
+
+    it "should handle nils" do
+      dh = DataHut.connect("foo")
+
+      data = [{name: nil, birthday: '1978-02-11'},
+              {name: "fred", birthday: '1988-02-11'},
+              {name: "larry", birthday: nil}]
+
+      # here we have an unsanitized datasource with some nils.
+      dh.extract(data) do |r, d|
+        r.name = d[:name]
+        r.birthday = Date.parse(d[:birthday]) rescue nil
+      end
+
+      # make sure additional transforms also behave well.
+      dh.transform do |r|
+        r.my_nil = r.name
+      end
     end
 
   end
