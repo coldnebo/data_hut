@@ -20,8 +20,8 @@ def generate_report(ds)
   @css        = File.read("weather_files/weather.css")
   @js         = File.read("weather_files/weather.js")
   engine      = Haml::Engine.new(File.read("common/report.html.haml"))
-  report_name = "weather_report.html"
-
+  report_name = "output/weather_report.html"
+  FileUtils.mkdir("output") unless Dir.exists?("output")
   File.open(report_name, "w") do |f|
     f.puts engine.render(self)
   end

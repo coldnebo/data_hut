@@ -17,4 +17,4 @@ test/version_tmp
 tmp
 *.db
 samples/common/samples.gemfile.lock
-samples/weather_report.html
+samples/output
