@@ -1,0 +1,8 @@
+--no-private
+--protected
+--title "DataHut Documentation"
+--markup markdown
+--readme README.md
+- 
+LICENSE
+CHANGELOG.md

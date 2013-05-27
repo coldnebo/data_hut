@@ -1,4 +1,4 @@
-source :rubygems
+source 'https://rubygems.org'
 
 # these are gems used in the samples.
 # install with:
@@ -6,3 +6,4 @@ source :rubygems
 
 gem 'nokogiri'
 gem 'haml'
+gem 'highline'
