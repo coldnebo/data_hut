@@ -262,5 +262,48 @@ describe DataHut do
 
   end
 
+
+  describe "json export" do
+    def setup
+      @dh = DataHut.connect("foo")
+
+      # first data pull 
+      data = [{name: "barney", age: 27},
+              {name: "barney", age: 17},
+              {name: "barney", age: 37},
+              {name: "phil", age: 35},
+              {name: "phil", age: 31},
+              {name: "fred", age: 44}]
+ 
+      @dh.extract(data) do |r, d|
+        r.name = d[:name]
+        r.age = d[:age]
+      end
+    end
+
+    it "should provide json export" do
+      json = @dh.dataset.all.to_json
+
+      # should be valid json
+      result = JSON.parse(json)
+      assert(Array, result.class)
+      assert(Hash, result.first.class)
+      assert({"dw_id"=>1, "dw_processed"=>false, "name"=>"barney", "age"=>27}, result.first)
+    end
+
+    it "should provide json for calcs" do
+      # this collection doesn't convert to json using the Sequel :json_serializer plugin
+      # so using default json instead. see lib/data_hut/data_warehouse.rb:67
+      json = @dh.dataset.group_and_count(:name).all.to_json
+      
+      # should be valid json
+      result = JSON.parse(json)
+
+      assert(3,result.select{|r| r["name"] == "barney"}.first["count"])
+      assert(2,result.select{|r| r["name"] == "phil"}.first["count"])
+      assert(1,result.select{|r| r["name"] == "fred"}.first["count"])
+    end
+  end
+
 end
 

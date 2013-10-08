@@ -91,7 +91,13 @@ And results remain Sequel::Model objects, so you can access fields with object n
     [34] pry(main)> record.age
     => 44
 
+Or you can output results directly to JSON. 
 
+    [1] pry(main)> puts ds.group_and_count(:name).all.to_json
+    [{"name":"barney","count":3},{"name":"fred","count":1},{"name":"phil","count":2}]
+
+(See [samples/weather_station.rb](https://github.com/coldnebo/data_hut/blob/master/samples/weather_station.rb) for an example of using JSON output to visualize data with d3.js.)
+    
 Read more about the [Sequel gem](http://sequel.rubyforge.org/) to determine what operations you can perform on a DataHut dataset.
 
 ## A More Ambitious Example...

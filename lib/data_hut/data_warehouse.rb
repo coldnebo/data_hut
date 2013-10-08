@@ -1,6 +1,7 @@
 require 'sequel'
 require 'ostruct'
 require 'logger'
+require 'json'
 
 module DataHut
 
@@ -58,9 +59,16 @@ module DataHut
     # access the DataHut dataset. See {http://sequel.rubyforge.org/rdoc/classes/Sequel/Dataset.html Sequel::Dataset} 
     # for available operations on the dataset. 
     # 
+    # @note the resulting [Sequel::Model] additionally supports a #to_json method for JSON export of the dataset results.
     # @return [Sequel::Model] instance bound to the data warehouse. Use this handle to query and analyze the datahut.
     def dataset
-      Class.new(Sequel::Model(@db[:data_warehouse]))
+      klass = Class.new(Sequel::Model(@db[:data_warehouse]))
+      klass.class_eval do
+        def to_json(*a)
+          values.to_json(*a)
+        end
+      end
+      klass
     end
 
     # used to extract data from whatever source you wish. As long as the data forms an enumerable collection, 

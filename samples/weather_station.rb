@@ -10,13 +10,12 @@ require 'nokogiri'
 require 'open-uri'
 require 'pry'
 require 'haml'
-require 'json'
 
 
 def generate_report(ds)
   @title      = "Boston Weather Forecast"
   @h1         = "Forecasted Temperatures Report for Boston, MA, USA"
-  @data       = ds.order(:start_time).collect{|d| d.to_hash}.to_json
+  @data       = ds.order(:start_time).all.to_json
   @css        = File.read("weather_files/weather.css")
   @js         = File.read("weather_files/weather.js")
   engine      = Haml::Engine.new(File.read("common/report.html.haml"))

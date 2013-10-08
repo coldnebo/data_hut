@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.9
+
+* added to_json support for dataset results.
+
 ## 0.0.8 
 
 * handle unsanitized nil values properly - If your input data has occasional nil values during extract or transform, you may have seen:
