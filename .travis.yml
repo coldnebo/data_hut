@@ -4,10 +4,8 @@ rvm:
   - 2.0.0
   - 1.9.3
   - 1.9.2
-  - jruby-19mode # JRuby in 1.9 mode
+  - jruby-19mode
   - rbx-19mode
 env:  
   global:
-    - "JRUBY_OPTS=-Xcext.enabled=true"
     - "TRAVIS=1"
-
