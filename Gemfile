@@ -6,4 +6,5 @@ gemspec
 # for travis.cl
 group :test do
   gem 'rake'
+  gem 'mocha'
 end
