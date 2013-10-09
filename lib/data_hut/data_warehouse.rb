@@ -244,7 +244,12 @@ module DataHut
 
     def initialize(name)
       @db_file = "#{name}.db"
-      @db = Sequel.sqlite(@db_file)
+      
+      if RUBY_PLATFORM == "java"
+        @db = Sequel.connect("jdbc:sqlite//#{@db_file}")
+      else
+        @db = Sequel.sqlite(@db_file)
+      end 
       
       unless @db.table_exists?(:data_warehouse)
         @db.create_table(:data_warehouse) do
