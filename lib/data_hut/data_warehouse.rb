@@ -246,7 +246,7 @@ module DataHut
       @db_file = "#{name}.db"
       
       if RUBY_PLATFORM == "java"
-        @db = Sequel.connect("jdbc:sqlite//#{@db_file}")
+        @db = Sequel.connect("jdbc:sqlite://#{@db_file}")
       else
         @db = Sequel.sqlite(@db_file)
       end 
