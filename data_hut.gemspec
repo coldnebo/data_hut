@@ -16,6 +16,7 @@ Gem::Specification.new do |gem|
   gem.version       = DataHut::VERSION
 
   gem.add_dependency 'sequel'
+  
   if RUBY_PLATFORM == "java"
     gem.add_dependency 'jdbc-sqlite3'
   else
