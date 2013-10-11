@@ -3,7 +3,6 @@ unless ENV["TRAVIS"] == "1"
   SimpleCov.start
 
   require 'pry'
-  binding.pry
 end
 
 
