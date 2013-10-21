@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0
+
+* added support for jruby 1.9 mode.
+
 ## 0.0.9
 
 * added to_json support for dataset results.
