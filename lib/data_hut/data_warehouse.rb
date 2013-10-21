@@ -3,6 +3,7 @@ require 'ostruct'
 require 'logger'
 require 'json'
 
+
 module DataHut
 
   # The DataHut::DataWarehouse comprehensively manages all the heavy lifting of creating a data system for your analytics.
@@ -132,7 +133,7 @@ module DataHut
       @db[:data_warehouse].each do |h|
         # check for processed if not forced
         unless forced
-          next if h[:dw_processed] == true
+          next if h[:dw_processed] == TRUE_VALUE
         end
         # then get rid of the internal id and processed flags
         dw_id = h.delete(:dw_id)
@@ -242,12 +243,14 @@ module DataHut
 
     private 
 
+    # for some reason, jdbc-sqlite3 unmarshals TrueClass columns as Fixnums, so make this a plaform dependency.
+    TRUE_VALUE = (RUBY_PLATFORM == "java") ? 1 : true
+  
     def initialize(name)
       @db_file = "#{name}.db"
       
       if RUBY_PLATFORM == "java"
-        raise NotImplementedError, "jruby is not yet supported."
-        #@db = Sequel.connect("jdbc:sqlite://#{@db_file}")
+        @db = Sequel.connect("jdbc:sqlite:#{@db_file}")
       else
         @db = Sequel.sqlite(@db_file)
       end 
