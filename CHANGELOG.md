@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+* fix rogue 'ArgumentError: DataHut: Ruby type '...' not supported by Sequel.' errors.
+
 ## 0.1.0
 
 * added support for jruby 1.9 mode.

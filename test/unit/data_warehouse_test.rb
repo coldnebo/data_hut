@@ -11,7 +11,7 @@ class DataWarehouseTest < MiniTest::Unit::TestCase
 
   def test_cannot_instaniate
     assert_raises(NoMethodError) do
-      dw = DataHut::DataWarehouse.new  
+      DataHut::DataWarehouse.new  
     end
   end
 

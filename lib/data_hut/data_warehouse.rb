@@ -289,7 +289,7 @@ module DataHut
     def adapt_schema(h)
       h.keys.each do |key|
         type = h[key].class
-        unless Sequel::Schema::CreateTableGenerator::GENERIC_TYPES.include?(type)
+        unless Sequel::Schema::CreateTableGenerator::GENERIC_TYPES.include?(type.to_s)
           raise(ArgumentError, "DataHut: Ruby type '#{type}' not supported by Sequel. Must be one of the supported types: #{Sequel::Schema::CreateTableGenerator::GENERIC_TYPES.inspect}", caller)
         end
         unless @db[:data_warehouse].columns.include?(key)

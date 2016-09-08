@@ -26,8 +26,8 @@ describe DataHut do
   describe "connect" do 
     it "should create a database if none exists" do
       FileUtils.rm("foo.db", force: true)
-      dh = DataHut.connect("foo")
-      assert File.exists?("foo.db")
+      DataHut.connect("foo")
+      assert File.exist?("foo.db")
     end
   end
 
